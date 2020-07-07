@@ -9,10 +9,13 @@ class CustomFlatButton extends StatelessWidget {
       {
       this.text,
         this.textAlign,
-        this.parentView
+        this.parentView,
+        this.fromYview,
+        this.viewIndicator
       });
   String text;
-  var textAlign;
+  var textAlign, viewIndicator;
+  bool fromYview;
   Refreshable parentView;
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,7 @@ class CustomFlatButton extends StatelessWidget {
       ),),
       onPressed: ()
       {
-        this.parentView.updateView();
+        this.parentView.updateView(viewIndicator);
       },
     );
   }

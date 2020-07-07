@@ -2,21 +2,27 @@ PODS:
   - Flutter (1.0.0)
   - flutter_statusbarcolor (0.0.1):
     - Flutter
+  - photo_manager (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_statusbarcolor (from `.symlinks/plugins/flutter_statusbarcolor/ios`)
+  - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   flutter_statusbarcolor:
     :path: ".symlinks/plugins/flutter_statusbarcolor/ios"
+  photo_manager:
+    :path: ".symlinks/plugins/photo_manager/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_statusbarcolor: 8afb1071ed8c58be929f1e32b36c629771fd2259
+  photo_manager: f7c619c2cc8c2adb8d85c63363babac477de9c67
 
-PODFILE CHECKSUM: c34e2287a9ccaa606aeceab922830efb9a6ff69a
+PODFILE CHECKSUM: c1b34269bf95e90b6647bf1a6afe1ab381fe5ad6
 
 COCOAPODS: 1.9.3

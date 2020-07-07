@@ -1,9 +1,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:xyapp/CustomWidgets/CustomImageCache.dart';
 import 'package:xyapp/Views/Home.dart';
 import 'package:xyapp/Views/SignUp.dart';
 void main(){
+  CustomImageCache();
   runApp(MyApp());
 }
 class MyApp extends StatelessWidget {
@@ -19,3 +21,4 @@ class MyApp extends StatelessWidget {
 
   }
 }
+
