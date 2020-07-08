@@ -22,8 +22,10 @@ class HomeState extends State<Home> implements Refreshable{
   TextEditingController _yTextController  = new TextEditingController();
 
   List<Widget> _mediaList = [];
+  List<int> imageId = [];
   int currentPage = 0;
   int lastPage;
+  int _imageControllerX, _imageControllerY;
 
   int textLength;
   String xSide, ySide;
@@ -35,6 +37,9 @@ class HomeState extends State<Home> implements Refreshable{
     textLength = 0;
     _viewIndicator = 0;
     _showCancel = false;
+    _imageControllerX = 0;
+    _imageControllerY = 0;
+    _fetchNewMedia();
   }
   @override
   void dispose() {
@@ -86,24 +91,30 @@ class HomeState extends State<Home> implements Refreshable{
     }
   }
   void updateView(int viewIndicator){
-    if(viewIndicator == 2){
+    if(viewIndicator == 2){    //shows ask Y
       setState(() {
         xSide = _xTextController.text;
         textLength = 0;
         _viewIndicator = 2;
       });
     }
-    if(viewIndicator == 3){
+    if(viewIndicator == 3){     //shows ask X and ask Y
       setState(() {
         ySide = _yTextController.text;
         textLength = 0;
         _viewIndicator = 3;
       });
     }
-    if(viewIndicator == 4){
-      _fetchNewMedia();
+    if(viewIndicator == 4){   // shows images from ask X
       setState(() {
+        _imageControllerX = 0;
         _viewIndicator = 4;
+      });
+    }
+    if(viewIndicator == 5){   // shows images from ask Y
+      setState(() {
+        _imageControllerY = 0;
+        _viewIndicator = 5;
       });
     }
 
@@ -124,37 +135,44 @@ class HomeState extends State<Home> implements Refreshable{
     SizeConfig().init(context);
     switch (_viewIndicator){
       case 0:
-        return Scaffold(
+        return Scaffold(             //show default view
           appBar: showDefaultAppbar(),
           body: defaultView(),
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
-      case 1:
+      case 1:                      //shows ask X
         return Scaffold(
           appBar: showXappBar(),
           body: askXview(),
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
-      case 2:
+      case 2:                      //shows ask Y
         return Scaffold(
           appBar: showYappBar(),
           body: askYview(),
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
-      case 3:
+      case 3:               //shows ask Y
         return Scaffold(
           appBar: showXappBar(),
           body: askXYview(),
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
-      case 4:
+      case 4:                // shows images from ask X
         return Scaffold(
           appBar: showXappBar(),
           body: askXview(),
+          endDrawer: createDrawer(),
+          endDrawerEnableOpenDragGesture: false,
+        );
+      case 5:                // shows images from ask Y
+        return Scaffold(
+          appBar: showXappBar(),
+          body: askYview(),
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
@@ -185,10 +203,11 @@ showXappBar(){
     centerTitle: true,
     title: Container(
       height: 20.0,
-      child: Image.asset(
-        "assets/images/logo.png",
-        fit: BoxFit.contain,
-      ),
+      child: Text("X/Y",
+      style: TextStyle(
+        fontFamily: "AppleGothic",
+        color: Colors.black
+      ),)
     ),
     backgroundColor: Colors.white,
     brightness: Brightness.light,
@@ -223,10 +242,11 @@ showXappBar(){
           Center(
             child: Container(
               height: 20.0,
-              child: Image.asset(
-                "assets/images/logo.png",
-                fit: BoxFit.contain,
-              ),
+              child: Text("X/Y",
+                style: TextStyle(
+                    fontFamily: "AppleGothic",
+                    color: Colors.black
+                ),)
             ),
           )
         ]),
@@ -250,13 +270,16 @@ showXappBar(){
   defaultView() {
     return Center(
       child: new FlatButton(
-        child: Image.asset(
-          "assets/images/logo.png",
-          fit: BoxFit.contain,
-        ),
+        child: Text("X/Y",
+          style: TextStyle(
+              fontFamily: "AppleGothic",
+              fontSize: 100.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+          ),),
         onPressed: () {
           setState(() {
-            _viewIndicator = 1;
+            _viewIndicator = 1;   //show case 1 ask X view
           });
         },
       ),
@@ -352,10 +375,18 @@ showXappBar(){
                       controller: _xTextController,
                       parentView: this,
                       hint: "Ask me...",
-                      maxLines: 12,
+                      maxLines: 10,
                       maxLength: 2000,
                       fontSized: 20.0,
                     )),
+                Center(
+                  child: (_viewIndicator == 4) ?
+                  Container(
+                    height: SizeConfig.blockSizeVertical * 20,
+                    width: SizeConfig.blockSizeHorizontal * 80,
+                    child: _mediaList[_imageControllerX],
+                  ) : Container(),
+                )
               ],
             ),
           ),
@@ -401,9 +432,20 @@ showXappBar(){
               },
               child: GridView.builder(
                 itemCount: _mediaList.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
                 itemBuilder: (BuildContext context, int index){
-                  return _mediaList[index];
+                  //imageId.add(index);
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _imageControllerX = index;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(12.0),
+                      child: _mediaList[index],
+                    ),
+                  );
                 },
               ) ,
             ),
@@ -420,13 +462,13 @@ showXappBar(){
       width: SizeConfig.screenWidth,
       child: ListView(
         children: <Widget>[
+          SizedBox(
+            height: 30.0,
+          ),
           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
-                  height: 30.0,
-                ),
                 Center(
                   child: Text("Y"),
                 ),
@@ -438,46 +480,83 @@ showXappBar(){
                       parentView: this,
                       hint: "Ask me...",
                       controller: _yTextController,
-                      maxLines: 12,
+                      maxLines: 10,
                       maxLength: 2000,
                       fontSized: 20.0,
                     )),
-                Container(
-                  padding: EdgeInsets.only(left: 20.0),
-                  child: Text(textLength.toString()+"/2000",
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                        color: Colors.black26,
-                      )),
+                Center(
+                  child: (_viewIndicator == 5) ?
+                  Container(
+                    height: SizeConfig.blockSizeVertical * 20,
+                    width: SizeConfig.blockSizeHorizontal * 80,
+                    child: _mediaList[_imageControllerY],
+                  ) : Container(),
                 ),
-                Container(
-                  padding: EdgeInsets.all(0.0),
-                  child: Row(
-                    children: <Widget>[
-                      CustomFlatButton(
-                        text: "upload",
-                        textAlign: TextAlign.start,
-                      ),
-                      SizedBox(width: 70.0,),
-                      CustomFlatButton(
-                        text: "submit",
-                        viewIndicator: 3,
-                        parentView: this,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(width: 70.0,),
-                      (_showCancel) ?
-                      CustomFlatButton(
-                        text: "cancel",
-                        parentView: this,
-                        textAlign: TextAlign.center,
-                      ) : Text(""),
-                    ],
-                  ),
-                )
               ],
             ),
-          )
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 20.0),
+            child: Text(textLength.toString()+"/2000",
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  color: Colors.black26,
+                )),
+          ),
+          Container(
+            padding: EdgeInsets.all(0.0),
+            child: Row(
+              children: <Widget>[
+                CustomFlatButton(
+                  viewIndicator: 5,
+                  parentView: this,
+                  text: "upload",
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(width: 70.0,),
+                CustomFlatButton(
+                  text: "submit",
+                  viewIndicator: 3,
+                  parentView: this,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(width: 70.0,),
+                (_showCancel) ?
+                CustomFlatButton(
+                  text: "cancel",
+                  parentView: this,
+                  textAlign: TextAlign.center,
+                ) : Text(""),
+              ],
+            ),
+          ),
+          (_viewIndicator == 5) ?  Container(
+            height: 300.0,
+            width: 100.0,
+            child:  NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scroll){
+                return;
+              },
+              child: GridView.builder(
+                itemCount: _mediaList.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+                itemBuilder: (BuildContext context, int index){
+                  //imageId.add(index);
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _imageControllerY = index;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(12.0),
+                      child: _mediaList[index],
+                    ),
+                  );
+                },
+              ) ,
+            ),
+          ) : Text("")
         ],
       ),
     );
