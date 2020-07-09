@@ -25,12 +25,12 @@ class HomeState extends State<Home> implements Refreshable{
   List<int> imageId = [];
   int currentPage = 0;
   int lastPage;
-  int _imageControllerX, _imageControllerY;
+  int _imageControllerX, _imageControllerY, _selectedImageControllerX, _selectedImageControllerY;
 
   int textLength;
   String xSide, ySide;
   int _viewIndicator;
-  bool _showCancel;
+  bool _showCancel, _isImagesDisplayedX, _isImagesDisplayedY;
   @override
   void initState() {
     super.initState();
@@ -39,6 +39,8 @@ class HomeState extends State<Home> implements Refreshable{
     _showCancel = false;
     _imageControllerX = 0;
     _imageControllerY = 0;
+    _isImagesDisplayedX = false;
+    _isImagesDisplayedY =false;
     _fetchNewMedia();
   }
   @override
@@ -91,31 +93,115 @@ class HomeState extends State<Home> implements Refreshable{
     }
   }
   void updateView(int viewIndicator){
-    if(viewIndicator == 2){    //shows ask Y
+    if(viewIndicator == 1){    //shows ask X
       setState(() {
-        xSide = _xTextController.text;
-        textLength = 0;
-        _viewIndicator = 2;
+        _viewIndicator = 1;
       });
+    }
+    if(viewIndicator == 2){    //shows ask Y
+      if(_xTextController.text == ""){
+        print("No inputted");
+        final snackBar = SnackBar(
+          content: Text('No question inputted!'),
+        );
+        Scaffold.of(context).showSnackBar(snackBar);
+      }else{
+        setState(() {
+          xSide = _xTextController.text;
+          textLength = 0;
+          _viewIndicator = 2;
+        });
+      }
     }
     if(viewIndicator == 3){     //shows ask X and ask Y
-      setState(() {
-        ySide = _yTextController.text;
-        textLength = 0;
-        _viewIndicator = 3;
-      });
+      if(_yTextController.text == ""){
+        final snackBar = SnackBar(
+          content: Text('No question inputted!'),
+        );
+        Scaffold.of(context).showSnackBar(snackBar);
+      }else{
+        setState(() {
+          ySide = _yTextController.text;
+          textLength = 0;
+          _viewIndicator = 3;
+        });
+      }
     }
-    if(viewIndicator == 4){   // shows images from ask X
-      setState(() {
-        _imageControllerX = 0;
-        _viewIndicator = 4;
-      });
+    if(viewIndicator == 4){   // upload is tapped shows images from ask X view
+      if(_isImagesDisplayedX){  //if true hides images
+        setState(() {
+          _viewIndicator = 1;
+          _isImagesDisplayedX = false;
+        });
+      }else{       //displays images
+        setState(() {
+          _selectedImageControllerX = 0;
+          _imageControllerX = 0;
+          _viewIndicator = 4;
+          _isImagesDisplayedX = true;
+        });
+      }
     }
-    if(viewIndicator == 5){   // shows images from ask Y
-      setState(() {
-        _imageControllerY = 0;
-        _viewIndicator = 5;
-      });
+    if(viewIndicator == 5){   // upload is tapped shows images from ask Y view
+      if(_isImagesDisplayedY){ // if true hides images
+        setState(() {
+          _viewIndicator = 2;
+          _isImagesDisplayedY = false;
+        });
+      }else{              //displays images
+        setState(() {
+          _selectedImageControllerY = 0;
+          _imageControllerY = 0;
+          _viewIndicator = 5;
+          _isImagesDisplayedY = true;
+        });
+      }
+    }
+    if(viewIndicator == 6){   // when +1 is press, select image as X value
+     if(_xTextController.text == ""){
+       print("No question inputted");
+       final snackBar = SnackBar(
+         content: Text('No question inputted!'),
+       );
+       Scaffold.of(context).showSnackBar(snackBar);
+     }else{
+       setState(() {
+         xSide = _xTextController.text;
+         _imageControllerX = 0;
+         _selectedImageControllerX = null;
+         _viewIndicator = 6;
+       });
+     }
+    }
+    if(viewIndicator == 7){   // select image as Y value
+      if(_selectedImageControllerX == null){
+        print("No image selected");
+        final snackBar = SnackBar(
+          content: Text('No image selected!'),
+        );
+        Scaffold.of(context).showSnackBar(snackBar);
+      }else{
+        setState(() {
+          xSide = _xTextController.text;
+          _selectedImageControllerY = null;
+          _imageControllerY = 0;
+          _viewIndicator = 7;
+        });
+      }
+    }
+    if(viewIndicator == 8){   //shows ask X and ask Y with images
+     if(_selectedImageControllerY == null){
+       print("No image selected for Y value");
+       final snackBar = SnackBar(
+         content: Text('No image selected!'),
+       );
+       Scaffold.of(context).showSnackBar(snackBar);
+     }else{
+       setState(() {
+         xSide = _xTextController.text;
+         _viewIndicator = 8;
+       });
+     }
     }
 
 }
@@ -155,7 +241,7 @@ class HomeState extends State<Home> implements Refreshable{
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
-      case 3:               //shows ask Y
+      case 3:               //shows ask X and ask Y
         return Scaffold(
           appBar: showXappBar(),
           body: askXYview(),
@@ -176,9 +262,352 @@ class HomeState extends State<Home> implements Refreshable{
           endDrawer: createDrawer(),
           endDrawerEnableOpenDragGesture: false,
         );
+      case 6:                //update view  when +1 press on X view
+        return Scaffold(
+          appBar: showYappBar(),
+          body: showXviewOntap_1(),
+          endDrawer: createDrawer(),
+          endDrawerEnableOpenDragGesture: false,
+        );
+      case 7:                //update view  when +1 press on Y view
+        return Scaffold(
+          appBar: showYappBar(),
+          body: showYviewOntap_1(),
+          endDrawer: createDrawer(),
+          endDrawerEnableOpenDragGesture: false,
+        );
+      case 8:               //shows ask X and ask Y view with Images
+        return Scaffold(
+          appBar: showXappBar(),
+          body: askXYviewImages(),
+          endDrawer: createDrawer(),
+          endDrawerEnableOpenDragGesture: false,
+        );
       default:
         return Text("Something went wrong");
     }
+  }
+  askXYviewImages() {
+    return Container(
+      height: SizeConfig.screenHeight,
+      width: SizeConfig.screenWidth,
+      child: ListView(
+        children: <Widget>[
+          SizedBox(height: 50.0,),
+          Container(
+            padding: EdgeInsets.only(left: 20.0, right: 20.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  height: SizeConfig.blockSizeVertical * 30,
+                  width: SizeConfig.blockSizeHorizontal * 45,
+                  child: _mediaList[_selectedImageControllerX],
+                ),
+                Container(
+                  height: SizeConfig.blockSizeVertical * 30,
+                  width: SizeConfig.blockSizeHorizontal * 45,
+                  child: _mediaList[_selectedImageControllerY],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+           child: Text(xSide,
+           textAlign: TextAlign.center,
+           style: TextStyle(
+             color: Colors.black26,
+             fontSize: 20.0,
+             fontFamily: "Helvetica"
+           ),)
+          ),
+          Container(
+            child: Center(
+              child: Text("____________"),
+            ),
+          ),
+          SizedBox(height: 10.0,),
+          Container(
+            child: Center(
+              child: Text("awaiting moderators approval",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20.0
+                ),),
+            ),
+          ),
+          SizedBox(height: 20.0,),
+          SpinKitFadingCircle(
+            color: Colors.black,
+            size: 200.0,
+          )
+        ],
+      ),
+    );
+  }
+  showYviewOntap_1() {
+    return Container(
+      height: SizeConfig.screenHeight,
+      width: SizeConfig.screenWidth,
+      child: ListView(
+        children: <Widget>[
+          SizedBox(
+            height: 30.0,
+          ),
+          Container(
+            //color: Colors.red,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      CustomFlatButton(
+                        text: "cancel",
+                        parentView: this,
+                        viewIndicator: 1,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        width: SizeConfig.blockSizeHorizontal * 50,
+                      ),
+                      CustomFlatButton(
+                        text: "next",
+                        viewIndicator: 8,
+                        parentView: this,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                  height: SizeConfig.blockSizeVertical * 30,
+                  width: SizeConfig.screenWidth,
+                  child: _mediaList[_imageControllerY],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            //padding: EdgeInsets.only(top: 20.0),
+            height: 100.0,
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: SizeConfig.blockSizeHorizontal * 45,
+                ),
+                Container(
+                  height: 50.0,
+                  width: 100.0,
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        height: 30.0,
+                        width: 30.0,
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black26)
+                        ),
+                        child: (_selectedImageControllerY!=null)? _mediaList[_selectedImageControllerY] : null,
+                      ),
+                      Positioned(
+                        left: 10.0,
+                        top: 10.0,
+                        child:  Container(
+                          height: 30.0,
+                          width: 30.0,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.black26)
+                          ),
+                          child: (_selectedImageControllerX!=null)? _mediaList[_selectedImageControllerX] : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                CustomFlatButton(
+                  text: "+1",
+                  parentView: this,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 300.0,
+            //width: 100.0,
+            child:  NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scroll){
+                return;
+              },
+              child: GridView.builder(
+                itemCount: _mediaList.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+                itemBuilder: (BuildContext context, int index){
+                  if(_selectedImageControllerX == index){
+                    return Center(
+                      child: Text("X",
+                        style: TextStyle(
+                            fontFamily: "Helvetica",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30.0
+                        ),),
+                    );
+                  }else{
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedImageControllerY = index;
+                          _imageControllerY = index;
+                        });
+                      },
+                      child: (_selectedImageControllerY == index) ?
+                      Center(
+                        child: Text("Y",
+                          style: TextStyle(
+                              fontFamily: "Helvetica",
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30.0
+                          ),),
+                      ) : Container(
+                        child: _mediaList[index],
+                      ),
+                    );
+                  }
+                },
+              ) ,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  showXviewOntap_1() {
+    return Container(
+      height: SizeConfig.screenHeight,
+      width: SizeConfig.screenWidth,
+      child: ListView(
+        children: <Widget>[
+          SizedBox(
+            height: 30.0,
+          ),
+          Container(
+            //color: Colors.red,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      CustomFlatButton(
+                        text: "cancel",
+                        parentView: this,
+                        viewIndicator: 1,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        width: SizeConfig.blockSizeHorizontal * 50,
+                      ),
+                      CustomFlatButton(
+                        text: "next",
+                        viewIndicator: 7,
+                        parentView: this,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                  height: SizeConfig.blockSizeVertical * 30,
+                  width: SizeConfig.screenWidth,
+                  child: _mediaList[_imageControllerX],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            //padding: EdgeInsets.only(top: 20.0),
+            height: 100.0,
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: SizeConfig.blockSizeHorizontal * 45,
+                ),
+                Container(
+                  height: 50.0,
+                  width: 100.0,
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        height: 30.0,
+                        width: 30.0,
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black26)
+                        ),
+                      ),
+                       Positioned(
+                        left: 10.0,
+                        top: 10.0,
+                        child:  Container(
+                          height: 30.0,
+                          width: 30.0,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                              border: Border.all(color: Colors.black26)
+                          ),
+                          child: (_selectedImageControllerX!=null)? _mediaList[_selectedImageControllerX] : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                CustomFlatButton(
+                  text: "+1",
+                  parentView: this,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 300.0,
+            //width: 100.0,
+            child:  NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scroll){
+                return;
+              },
+              child: GridView.builder(
+                itemCount: _mediaList.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+                itemBuilder: (BuildContext context, int index){
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedImageControllerX = index;
+                        _imageControllerX = index;
+                      });
+                    },
+                    child: (_selectedImageControllerX == index) ?
+                    Center(
+                      child: Text("X",
+                      style: TextStyle(
+                        fontFamily: "Helvetica",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30.0
+                      ),),
+                    ) : Container(
+                      child: _mediaList[index],
+                    ),
+                  );
+                },
+              ) ,
+            ),
+          )
+        ],
+      ),
+    );
   }
 showDefaultAppbar(){
   return AppBar(
@@ -350,7 +779,7 @@ showXappBar(){
       ),
     );
   }
-  askXview() {
+  askXview() {                               // _viewIndicator is 1
     return Container(
       height: SizeConfig.screenHeight,
       width: SizeConfig.screenWidth,
@@ -418,6 +847,8 @@ showXappBar(){
                 SizedBox(width: 70.0,),
                 CustomFlatButton(
                   text: "+1",
+                  viewIndicator: 6,
+                  parentView: this,
                   textAlign: TextAlign.right,
                 )
               ],
@@ -438,11 +869,19 @@ showXappBar(){
                   return InkWell(
                     onTap: () {
                       setState(() {
+                        _selectedImageControllerX = index;
                         _imageControllerX = index;
                       });
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(12.0),
+                    child: (_selectedImageControllerX == index) ?
+                    Center(
+                      child: Text("X",
+                        style: TextStyle(
+                            fontFamily: "Helvetica",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30.0
+                        ),),
+                    ) : Container(
                       child: _mediaList[index],
                     ),
                   );
@@ -541,15 +980,22 @@ showXappBar(){
                 itemCount: _mediaList.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
                 itemBuilder: (BuildContext context, int index){
-                  //imageId.add(index);
                   return InkWell(
                     onTap: () {
                       setState(() {
+                        _selectedImageControllerY = index;
                         _imageControllerY = index;
                       });
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(12.0),
+                    child: (_selectedImageControllerY == index) ?
+                    Center(
+                      child: Text("Y",
+                        style: TextStyle(
+                            fontFamily: "Helvetica",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30.0
+                        ),),
+                    ) : Container(
                       child: _mediaList[index],
                     ),
                   );
